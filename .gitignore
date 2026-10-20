@@ -1,0 +1,141 @@
+# =============================================================================
+# Patient data and clinical artifacts
+# This repository must never contain real patient data. Rules below block the
+# file types that typically carry it. Only synthetic data is allowed (see the
+# exceptions at the end of this file).
+# =============================================================================
+
+# Imaging (DICOM)
+*.dcm
+*.dicom
+*.ima
+DICOMDIR
+
+# Spreadsheets and tabular exports (imaging request logs, extracts)
+*.xlsx
+*.xlsm
+*.xls
+*.ods
+*.csv
+*.tsv
+*.parquet
+*.feather
+
+# Clinical notes and documents (ward handovers, ER notes)
+*.docx
+*.doc
+*.rtf
+*.odt
+
+# Local databases and dumps
+*.sqlite
+*.sqlite3
+*.db
+*.sql
+*.dump
+*.bak
+
+# Pseudonymization mapping tables (identifier to pseudonymous key).
+# Keep them in a dedicated private folder, ideally outside the repository.
+/private/
+/mapping_tables/
+
+# Pipeline outputs generated from real data
+/output/
+/outputs/
+/results/
+/reports/
+/exports/
+/figures/
+
+# =============================================================================
+# Secrets and credentials
+# =============================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+/secrets/
+credentials.json
+client_secret*.json
+service_account*.json
+token.json
+token.pickle
+
+# =============================================================================
+# Local models and caches for LLM-assisted extraction
+# =============================================================================
+/models/
+*.gguf
+*.safetensors
+*.onnx
+.cache/
+.ollama/
+
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging and build
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+wheels/
+
+# Testing and tooling caches
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# Jupyter
+.ipynb_checkpoints/
+# Notebook outputs can embed patient data. Strip them before committing
+# (for example with nbstripout) or keep exploratory notebooks out of the repo.
+
+# Logs
+*.log
+/logs/
+
+# =============================================================================
+# Editors and operating systems
+# =============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =============================================================================
+# Allowed: synthetic data and test fixtures only
+# These rules must stay at the end of the file so they override the patterns above.
+# =============================================================================
+!data/
+data/*
+!data/synthetic/
+!data/synthetic/**
+!tests/fixtures/
+!tests/fixtures/**
