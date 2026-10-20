@@ -211,13 +211,6 @@ This project processes sensitive personal health data. The repository is designe
 - [ ] Integration, prioritization and audit sampling
 - [ ] Phase 3: figures for presentation and publication
 
-## Author
-
-Axel, data engineer with a background in architecture.
-
-- GitHub: [axl-builder](https://github.com/axl-builder)
-- LinkedIn: [axellifschitz](https://linkedin.com/in/axellifschitz)
-
 ## License
 
 To be defined.
