@@ -16,7 +16,7 @@ This project builds the data infrastructure needed to:
 
 1. Find every eligible chest CT in the institution's historical records.
 2. Link each study to the patient's clinical history.
-3. Determine whether the patient is on preventive therapy (statins or aspirin).
+3. Determine whether the patient is on lipid-lowering therapy.
 4. Produce a consolidated dataset for retrospective analysis, clinical referral and scientific publication.
 
 The main obstacle is not clinical but technical: the required information is spread across disconnected systems and captured without standardization.
@@ -70,9 +70,12 @@ Medical audit (sample review)
 
 | Include | Exclude |
 |---|---|
-| Chest CT (TC / TAC de tórax) | Other anatomical regions (brain, spine, pelvis, limbs) |
-| Combined studies that include the chest (for example chest + abdomen + pelvis) | Contrast or vascular studies that distort calcium measurement (for example CT angiography of the chest) |
+| Chest CT (TC / TAC de tórax), recorded as `tx`, `torax`, `torax s/c` or `tx s/c` | CT angiography and pulmonary embolism (TEP) protocol studies |
+| Combined studies that include the chest (for example chest + abdomen + pelvis) | Contrast studies in any variant (`contraste`, `cte`), which distort calcium measurement |
+| Patients older than 40 | Other anatomical regions (brain, spine, pelvis, limbs) |
 | | Other imaging modalities (MRI, ultrasound) |
+
+The abbreviation `s/c` means "sin contraste" (non-contrast). These are the studies of interest, so they must be recognized before the contrast exclusion is applied.
 
 Illustrative sketch of the classification logic:
 
@@ -81,15 +84,20 @@ import re
 import unicodedata
 
 INCLUDE = re.compile(r"\b(torax|tx)\b")
-EXCLUDE = re.compile(r"\b(angio|contraste|cerebro|columna|resonancia|rm|eco\w*)\b")
+EXCLUDE = re.compile(
+    r"\b(angio\w*|tep|contraste|cte|cerebro|columna|resonancia|rm|eco\w*)\b"
+)
 
 def normalize(text: str) -> str:
     text = unicodedata.normalize("NFKD", text.lower())
     text = "".join(c for c in text if not unicodedata.combining(c))
-    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9 ]", " ", text)).strip()
+    text = re.sub(r"\bs\s*/\s*c\b", "sin contraste", text)  # "s/c" = without contrast
+    text = re.sub(r"[^a-z0-9 ]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 def is_eligible(study_name: str) -> bool:
     name = normalize(study_name)
+    name = re.sub(r"\bsin (contraste|cte)\b", " ", name)  # non-contrast studies stay eligible
     return bool(INCLUDE.search(name)) and not EXCLUDE.search(name)
 ```
 
@@ -105,15 +113,16 @@ The cleaned list is matched against the patient identifier in the imaging system
 
 **Target variables**
 
-- Comorbidities: diabetes, dyslipidemia or elevated cholesterol, hypertension.
-- Preventive medication: active statin therapy (atorvastatin, rosuvastatin, simvastatin) or aspirin.
+- Cardiovascular risk factors: hypertension, dyslipidemia, smoking status (yes, no, former), obesity.
+- Lipid-lowering therapy: statins (atorvastatin, rosuvastatin, simvastatin), ezetimibe, bempedoic acid and others.
+- Laboratory values (urea, creatinine, total cholesterol), taken from the laboratory system rather than the clinical notes.
 
 **Processing layers**
 
 | Layer | Purpose |
 |---|---|
 | Document parsing | Convert Word files to plain text (`python-docx`) and assign each text block to a patient identifier. |
-| Rules and dictionaries | Regular expressions and clinical term dictionaries, with negation and context handling (for example "niega diabetes", "sin antecedentes de dislipidemia", "suspende aspirina"). |
+| Rules and dictionaries | Regular expressions and clinical term dictionaries, with negation and context handling (for example "niega hipertensión", "sin antecedentes de dislipidemia", "suspende atorvastatina"). |
 | LLM-assisted extraction | A language model, local or behind an API with data privacy guarantees, converts free-text paragraphs into a structured record per patient. |
 
 Target output schema:
@@ -121,13 +130,19 @@ Target output schema:
 ```json
 {
   "paciente_id": "12345",
-  "es_diabetico": false,
-  "tiene_dislipidemia": true,
-  "toma_estatinas": false,
-  "toma_aspirina": false,
-  "evidencia_texto": "Paciente de 62 años con antecedentes de dislipemia. No refiere medicación habitual."
+  "hipertension": false,
+  "dislipidemia": true,
+  "tabaquismo": "EX",
+  "obesidad": false,
+  "estatinas": false,
+  "ezetimibe": false,
+  "acido_bempedoico": false,
+  "otro_hipolipemiante": false,
+  "evidencia_texto": "Paciente de 62 años, ex fumador, con antecedentes de dislipemia. No refiere medicación habitual."
 }
 ```
+
+When a note does not mention a variable, the field is returned as `null` (no data) rather than `false`, so that an unrecorded history is never read as an absent one.
 
 The `evidencia_texto` field keeps the source sentence for each extraction so that every flag can be audited by a clinician.
 
@@ -137,8 +152,8 @@ The Phase 1 table (imaging and calcium score) is joined with the Phase 2 structu
 
 | Group | Label | Criterion |
 |---|---|---|
-| A | Highest priority | Elevated calcium score, no statin or aspirin |
-| B | Under treatment | Elevated calcium score, active preventive therapy |
+| A | Highest priority | Elevated coronary calcium, no lipid-lowering therapy |
+| B | Under treatment | Elevated coronary calcium, active lipid-lowering therapy |
 | C | No elevated risk | Normal calcium score |
 
 ### Validation and quality control
@@ -152,7 +167,7 @@ From the consolidated dataset the pipeline generates four publication-ready figu
 1. **Cohort flowchart (PRISMA style).** Total records, filtered by chest CT, evaluated in PACS, final analyzed cohort.
 2. **Treatment gap.** Among patients with coronary calcium, the proportion with and without preventive therapy.
 3. **Calcium score severity distribution.** Agatston score grouped as 0, 1 to 99, 100 to 399 and 400 or more.
-4. **Risk factor cross-tabulation.** Coronary calcium against diabetes, hypertension and age group.
+4. **Risk factor cross-tabulation.** Coronary calcium against hypertension, dyslipidemia, smoking status, obesity and age group.
 
 ## Tech Stack
 
@@ -210,6 +225,13 @@ This project processes sensitive personal health data. The repository is designe
 - [ ] Phase 2: clinical note parsing, rules and LLM-assisted extraction
 - [ ] Integration, prioritization and audit sampling
 - [ ] Phase 3: figures for presentation and publication
+
+## Author
+
+Axel, data engineer with a background in architecture.
+
+- GitHub: [axl-builder](https://github.com/axl-builder)
+- LinkedIn: [axellifschitz](https://linkedin.com/in/axellifschitz)
 
 ## License
 
