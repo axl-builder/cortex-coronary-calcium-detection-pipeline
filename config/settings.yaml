@@ -1,4 +1,3 @@
-# config/settings.yaml
 sheets:
   reciente: "3105"
   antigua: "Hoja 161"
@@ -10,6 +9,7 @@ dates:
   max_hueco_esperado: 3
   fechas_manuales:
     "Hoja 161": "2025-12-01"
+  politica_sin_fecha: "sin_fecha"   # omitir | sin_fecha | nombre
 
 columns:
   paciente: 1
@@ -24,5 +24,14 @@ columns:
 contraste:
   sin: ["NO", "SEDACION"]
   con: ["SI", "DOBLE", "EVENTUAL", "ORAL"]
+  incluir: ["sin_contraste", "con_contraste", "desconocido"]
 
-politica_sin_fecha: "sin_fecha"
+header:
+  - fecha
+  - PACIENTE
+  - ESTUDIO
+  - REGION
+  - CONTRASTE
+  - HECHO
+  - PREINFORME
+  - CANCELADO
