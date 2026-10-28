@@ -1,0 +1,1 @@
+# TODO: leer logs/resumen_*.json y consolidar métricas del flowchart
