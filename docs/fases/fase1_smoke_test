@@ -1,0 +1,46 @@
+# Fase 1 — Smoke test end-to-end con Drive
+
+**Objetivo:** validar el pipeline completo de Fase 1 (Sheets real →
+cleaning → CSV → upload) usando datos sintéticos en Drive. Sin PII.
+
+**Duración:** ~15 min.
+
+**Pre-requisitos:**
+
+- `.env` con `SPREADSHEET_ID` y `OUTPUT_FOLDER_ID` (ver `.env.example`).
+- `keys/` con credenciales de service account y OAuth (ver README principal).
+- `config/settings.yaml` ajustado a las pestañas del mock (ver Paso 3).
+
+## Paso 1 — Generar el mock
+
+```bash
+python -m src.synthetic --profile realista --seed 42 --format xlsx
+```
+
+Salida esperada:
+
+```text
+Generadas 30 pestañas totales (sin fecha manual)
+  - 4 no-guardia (portada/conteos)
+  - 30 de guardia (DDMM)
+Exportado:
+  xlsx:  data/synthetic/planilla_sintetica.xlsx
+```
+
+Opcional: si tu planilla real tiene una pestaña con fecha manual
+(como "Hoja 161"), generá el mock con esa pestaña:
+
+```bash
+python -c "
+from src.synthetic import generar_para_fase1
+from src.synthetic.exporters import exportar_xlsx
+from pathlib import Path
+
+result, nombres = generar_para_fase1(
+    profile='realista', seed=42,
+    pestanias_con_fecha_manual=['Hoja 161'],
+)
+exportar_xlsx(result, Path('data/synthetic/planilla_sintetica.xlsx'))
+print(f'Generadas {len(result[\"valueRanges\"])} pestañas')
+"
+```
