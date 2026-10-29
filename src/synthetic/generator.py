@@ -1,17 +1,17 @@
 """
-Generador de planillas sintéticas que replica la estructura REAL de la
-planilla de guardia (no la versión limpia con pandas).
+Synthetic sheet generator that replicates the REAL structure of the on-call
+sheet (not the clean pandas version).
 
-Estructura por pestaña de guardia:
-  fila 0:   ["HACER CONTEO...", "PLANILLA GUARDIA", "", ...]  ← título operativo
-  fila 1:   ["CHECKLIST", "", ...]                            ← fila checklist
-  fila 2:   ["", "PACIENTE", "SECTOR", "HAB", "ESTUDIO", ...] ← header real
-  fila 3..N: ["comentario", "Nombre Paciente", "SHOCK", "119", "TC", ...]
-  fila N+1..: [residuales con FALSE x4 + 0:00:00 + -]
-  ...:      bloque de resumen + checklist operativo
+Structure per on-call tab:
+  row 0:   ["HACER CONTEO...", "PLANILLA GUARDIA", "", ...]  ← operational title
+  row 1:   ["CHECKLIST", "", ...]                            ← checklist row
+  row 2:   ["", "PACIENTE", "SECTOR", "HAB", "ESTUDIO", ...] ← real header
+  row 3..N: ["comment", "Patient Name", "SHOCK", "119", "TC", ...]
+  row N+1..: [residuals with FALSE x4 + 0:00:00 + -]
+  ...:      summary block + operational checklist
 
-Pestañas no-guardia (portada, conteos) al principio, ignoradas por el pipeline.
-Pestañas con fecha manual (ej. "Hoja 161") son opcionales, se pasan por parámetro.
+Non-on-call tabs (cover, counts) at the beginning, ignored by the pipeline.
+Tabs with a manual date (e.g. "Hoja 161") are optional, passed as a parameter.
 """
 
 import csv
@@ -30,7 +30,7 @@ from .templates import (
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Vocabularios
+# Vocabularies
 # ──────────────────────────────────────────────────────────────────────
 
 _NOMBRES = ["Juan", "María", "Carlos", "Ana", "Luis", "Sofía", "Diego",
@@ -123,7 +123,7 @@ def _region(rng, estudio, perfil):
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Generación de filas
+# Row generation
 # ──────────────────────────────────────────────────────────────────────
 
 def _fila_guardia(rng, perfil, idx):
@@ -156,7 +156,7 @@ def _columnas_conteo(rng, n):
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Pestaña de guardia (genérica, sirve para DDMM y para fecha manual)
+# On-call tab (generic, works for DDMM and manual-date tabs)
 # ──────────────────────────────────────────────────────────────────────
 
 def _pestania_guardia(rng, perfil, nombre):
@@ -192,7 +192,7 @@ def _pestania_guardia(rng, perfil, nombre):
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Pestañas no-guardia
+# Non-on-call tabs
 # ──────────────────────────────────────────────────────────────────────
 
 def _pestania_portada(rng, nombre):
@@ -221,7 +221,7 @@ def _pestania_conteos(rng, nombre):
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Nombres de pestaña
+# Tab names
 # ──────────────────────────────────────────────────────────────────────
 
 def _nombres_guardia(rng, fecha_fin, n, perfil):
@@ -239,7 +239,7 @@ def _nombres_guardia(rng, fecha_fin, n, perfil):
 
 
 # ──────────────────────────────────────────────────────────────────────
-# API pública
+# Public API
 # ──────────────────────────────────────────────────────────────────────
 
 def generar_planilla_sintetica(profile: str = "realista",
@@ -249,22 +249,22 @@ def generar_planilla_sintetica(profile: str = "realista",
                                pestanias_con_fecha_manual: list[str] | None = None,
                                ) -> tuple[dict, list[str]]:
     """
-    Genera una planilla sintética con la estructura REAL.
+    Generate a synthetic sheet with the REAL structure.
 
     Args:
-        pestanias_con_fecha_manual: nombres de pestañas que NO siguen el
-            patrón DDMM y tienen fecha fija en `settings.dates.fechas_manuales`
-            (ej. `["Hoja 161"]`). Se agregan al principio del bloque de guardia.
-            Si es None, no se agrega ninguna.
+        pestanias_con_fecha_manual: names of tabs that do NOT follow the
+            DDMM pattern and have a fixed date in `settings.dates.fechas_manuales`
+            (e.g. `["Hoja 161"]`). They are appended at the beginning of the
+            on-call block. If None, no tab is added.
 
     Returns:
-        (result, nombres_seleccionados) donde `nombres_seleccionados` son
-        las pestañas que `fetch_selected_sheets` seleccionaría: las DDMM
-        + las de fecha manual, en el orden en que aparecen en el spreadsheet.
+        (result, nombres_seleccionados) where `nombres_seleccionados` are
+        the tabs that `fetch_selected_sheets` would select: the DDMM ones
+        plus the manual-date ones, in the order they appear in the spreadsheet.
     """
     if profile not in PROFILES:
-        raise ValueError(f"Perfil desconocido: {profile!r}. "
-                         f"Válidos: {sorted(PROFILES)}")
+        raise ValueError(f"Unknown profile: {profile!r}. " # TODO: layer 2
+                         f"Valid: {sorted(PROFILES)}")     # TODO: layer 2
     perfil = PROFILES[profile]
     rng = random.Random(seed)
     fecha_fin = fecha_fin or date(2026, 5, 31)
@@ -274,7 +274,7 @@ def generar_planilla_sintetica(profile: str = "realista",
 
     value_ranges = []
 
-    # 1. No-guardia al principio
+    # 1. Non-on-call tabs at the beginning
     n_portada = min(2, n_no_guardia)
     n_conteos = max(0, n_no_guardia - n_portada)
     for i in range(n_portada):
@@ -282,16 +282,16 @@ def generar_planilla_sintetica(profile: str = "realista",
     for i in range(n_conteos):
         value_ranges.append(_pestania_conteos(rng, _NOMBRES_CONTEOS[i % len(_NOMBRES_CONTEOS)]))
 
-    # 2. Pestañas con fecha manual (opcionales, genéricas)
+    # 2. Tabs with a manual date (optional, generic)
     for nombre in pestanias_con_fecha_manual:
         value_ranges.append(_pestania_guardia(rng, perfil, nombre))
 
-    # 3. Guardias DDMM
+    # 3. DDMM on-call tabs
     nombres_guardia = _nombres_guardia(rng, fecha_fin, n_guardia, perfil)
     for nombre in nombres_guardia:
         value_ranges.append(_pestania_guardia(rng, perfil, nombre))
 
-    # 4. Selección: DDMM + manuales (en el orden del spreadsheet)
+    # 4. Selection: DDMM + manual (in spreadsheet order)
     nombres_seleccionados = list(nombres_guardia) + list(pestanias_con_fecha_manual)
 
     return {"valueRanges": value_ranges}, nombres_seleccionados
@@ -303,14 +303,14 @@ def generar_para_fase1(profile: str = "realista",
                        n_pestanias_guardia: int | None = None,
                        pestanias_con_fecha_manual: list[str] | None = None,
                        ) -> tuple[dict, list[str]]:
-    """Alias con nombre explícito del contexto."""
+    """Alias with explicit context name."""
     return generar_planilla_sintetica(
         profile, seed, fecha_fin, n_pestanias_guardia, pestanias_con_fecha_manual,
     )
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Export CSV
+# CSV export (duplicated from exporters.py for backward compatibility)
 # ──────────────────────────────────────────────────────────────────────
 
 def exportar_csv(result: dict, out_dir: Path) -> list[Path]:

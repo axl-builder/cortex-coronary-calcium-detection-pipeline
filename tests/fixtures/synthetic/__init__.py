@@ -28,8 +28,9 @@ FIXTURE_CAOTICO = generar_para_fase1(profile="caotico", seed=7)
 
 
 def fixture_pestania(nombre: str, profile: str = "realista", seed: int = 42) -> dict:
+    """Return the valueRange of a specific tab from the fixture."""
     result, _ = generar_para_fase1(profile=profile, seed=seed)
     for vr in result["valueRanges"]:
         if vr["range"].startswith(f"'{nombre}'"):
             return vr
-    raise KeyError(f"Pestaña {nombre!r} no encontrada en el fixture")
+    raise KeyError(f"Tab {nombre!r} not found in the fixture")

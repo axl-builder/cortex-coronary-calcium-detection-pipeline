@@ -27,7 +27,7 @@ def fetch_selected_sheets(reciente: str, antigua: str) -> tuple[dict, list[str]]
     """
     spreadsheet_id = os.getenv("SPREADSHEET_ID")
     if not spreadsheet_id:
-        raise SystemExit("Falta SPREADSHEET_ID en .env")
+        raise SystemExit("Missing SPREADSHEET_ID in .env")
 
     service = _build_service()
     spreadsheet = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
