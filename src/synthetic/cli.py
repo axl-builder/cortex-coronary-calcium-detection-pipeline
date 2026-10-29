@@ -1,12 +1,10 @@
-"""CLI del generador de datos sintéticos.
+"""CLI for the synthetic data generator.
 
-Uso:
+Usage:
     python -m src.synthetic --profile realista --seed 42
     python -m src.synthetic --profile realista --seed 42 --format xlsx
     python -m src.synthetic --profile caotico --seed 7 --format all
 """
-
-"""CLI del generador de datos sintéticos."""
 
 import argparse
 from datetime import date, datetime
@@ -17,7 +15,7 @@ from .exporters import exportar_csv, exportar_xlsx, exportar_json, exportar_todo
 
 
 def _nombre_base(profile: str, seed: int, fecha: date | None) -> str:
-    """Nombre base para los archivos exportados: 'CORTEX - Planilla MOCK {profile} seed{seed} {fecha}'"""
+    """Base name for exported files: 'CORTEX - Planilla MOCK {profile} seed{seed} {fecha}'."""
     fecha_str = (fecha or datetime.now().date()).isoformat()
     return f"CORTEX - Planilla MOCK {profile} seed{seed} {fecha_str}"
 
@@ -30,7 +28,7 @@ def main():
     parser.add_argument("--n-pestanias-guardia", type=int, default=None)
     parser.add_argument("--fecha-fin", type=date.fromisoformat, default=None)
     parser.add_argument("--pestanias-fecha-manual", nargs="*", default=None,
-                        help="Nombres de pestañas con fecha manual (ej. 'Hoja 161')")
+                        help="Tab names with a manual date (e.g. 'Hoja 161')")  # TODO: layer 2
     parser.add_argument("--out", type=Path, default=Path("data/synthetic"))
     parser.add_argument("--format", default="all",
                         choices=["csv", "xlsx", "json", "all"])
@@ -48,13 +46,13 @@ def main():
     n_guardia = len(nombres)
     n_no_guardia = n_total - n_guardia
 
-    print(f"Generadas {n_total} pestañas totales:")
-    print(f"  - {n_no_guardia} no-guardia (ignoradas por Fase 1)")
-    print(f"  - {n_guardia} de guardia (procesadas por Fase 1)")
-    print(f"Perfil: {args.profile}, seed: {args.seed}")
+    print(f"Generated {n_total} tabs:")  # TODO: layer 2
+    print(f"  - {n_no_guardia} non-on-call (ignored by Phase 1)")  # TODO: layer 2
+    print(f"  - {n_guardia} on-call (processed by Phase 1)")  # TODO: layer 2
+    print(f"Profile: {args.profile}, seed: {args.seed}")  # TODO: layer 2
     if nombres:
-        print(f"Primeras guardias: {nombres[:5]}")
-        print(f"Últimas guardias:  {nombres[-5:]}")
+        print(f"First tabs: {nombres[:5]}")  # TODO: layer 2
+        print(f"Last tabs:  {nombres[-5:]}")  # TODO: layer 2
 
     nombre_base = _nombre_base(args.profile, args.seed, args.fecha_fin)
 
@@ -63,21 +61,21 @@ def main():
         csv_paths = exportar_csv(result, args.out / "csv")
         xlsx_path = exportar_xlsx(result, args.out / f"{nombre_base}.xlsx")
         json_path = exportar_json(result, args.out / f"{nombre_base}.json")
-        print(f"\nExportado:")
-        print(f"  xlsx:  {xlsx_path}")
-        print(f"  json:  {json_path}")
-        print(f"  csv:   {args.out / 'csv'}/ ({len(csv_paths)} archivos)")
+        print(f"\nExported:")  # TODO: layer 2
+        print(f"  xlsx:  {xlsx_path}")  # TODO: layer 2
+        print(f"  json:  {json_path}")  # TODO: layer 2
+        print(f"  csv:   {args.out / 'csv'}/ ({len(csv_paths)} files)")  # TODO: layer 2
     elif args.format == "csv":
         paths = exportar_csv(result, args.out / "csv")
-        print(f"\nCSV: {args.out / 'csv'}/ ({len(paths)} archivos)")
+        print(f"\nCSV: {args.out / 'csv'}/ ({len(paths)} files)")  # TODO: layer 2
     elif args.format == "xlsx":
         args.out.mkdir(parents=True, exist_ok=True)
         path = exportar_xlsx(result, args.out / f"{nombre_base}.xlsx")
-        print(f"\nXLSX: {path}")
+        print(f"\nXLSX: {path}")  # TODO: layer 2
     elif args.format == "json":
         args.out.mkdir(parents=True, exist_ok=True)
         path = exportar_json(result, args.out / f"{nombre_base}.json")
-        print(f"\nJSON: {path}")
+        print(f"\nJSON: {path}")  # TODO: layer 2
 
 
 if __name__ == "__main__":
