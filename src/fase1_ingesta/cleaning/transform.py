@@ -11,9 +11,9 @@ log = logging.getLogger("cortex")
 
 def transform_sheets(result: dict, nombres: list[str], settings: dict):
     """
-    Recorre `result` aplicando guardias y filtros.
-    Devuelve (filas, stats, problemas, fechas).
-    Cada fila es una lista lista para escribir al CSV (incluye fecha al inicio).
+    Iterate over `result`, applying guards and filters.
+    Returns (rows, stats, problems, dates).
+    Each row is a list ready to be written to the CSV (date prepended).
     """
     dates_cfg = settings["dates"]
     cols_cfg = settings["columns"]
@@ -46,8 +46,8 @@ def transform_sheets(result: dict, nombres: list[str], settings: dict):
     incluir = frozenset(filt_cfg.get("incluir", ["sin_contraste"]))
     politica = dates_cfg.get("politica_sin_fecha", "sin_fecha")
 
-    # Validación fail-fast: si `incluir` tiene valores fuera del vocabulario
-    # de `evaluar_contraste`, el pipeline no arranca.
+    # Fail-fast validation: if `incluir` has values outside the vocabulary
+    # of `evaluar_contraste`, the pipeline does not start.
     _VALIDOS = {"sin_contraste", "con_contraste", "desconocido"}
     _invalidos = set(incluir) - _VALIDOS
     if _invalidos:
@@ -56,10 +56,10 @@ def transform_sheets(result: dict, nombres: list[str], settings: dict):
             f"{sorted(_invalidos)}. Válidos: {sorted(_VALIDOS)}"
         )
 
-    log.info(f"[config efectiva] incluir={set(incluir)} sin={sin_set} con={con_set}")
+    log.info(f"[effective config] incluir={set(incluir)} sin={sin_set} con={con_set}")
 
-    # stats: contrato con Fase 3 (PRISMA flowchart).
-    # Solo números agregados, NO estado de debugging.
+    # stats: contract with Phase 3 (PRISMA flowchart).
+    # Aggregated numbers only, NOT debugging state.
     stats = {
         "ok": 0, "sin_datos": 0, "sin_fecha_omitida": 0, "sin_fecha_incluida": 0,
         "filas": 0, "filas_vacias": 0, "filas_cortas": 0,
@@ -74,7 +74,7 @@ def transform_sheets(result: dict, nombres: list[str], settings: dict):
     }
 
     filas_salida = []
-    diag_count = 0  # variable local, NO en stats
+    diag_count = 0  # local variable, NOT in stats
 
     for attributes, nombre, fecha in zip(result.get("valueRanges", []), nombres, fechas):
         if not pestaña_tiene_datos(attributes, filas_a_saltear):
@@ -119,12 +119,12 @@ def transform_sheets(result: dict, nombres: list[str], settings: dict):
             )
             est = evaluar_contraste(v_contraste_crudo, sin_set, con_set)
 
-            # diagnóstico: primeras 20 filas (variable local, no en stats)
+            # diagnostic: first 20 rows (local variable, not in stats)
             if diag_count < 20:
                 log.info(
-                    f"[diag] crudo={v_contraste_crudo!r} est={est!r} "
+                    f"[diag] raw={v_contraste_crudo!r} est={est!r} "
                     f"in={est in incluir} -> "
-                    f"{'INCLUIDA' if est in incluir else 'DESCARTADA'}"
+                    f"{'INCLUDED' if est in incluir else 'DISCARDED'}"
                 )
                 diag_count += 1
 

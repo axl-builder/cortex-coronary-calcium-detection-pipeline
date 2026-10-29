@@ -22,12 +22,13 @@ def _build_service():
 
 def fetch_selected_sheets(reciente: str, antigua: str) -> tuple[dict, list[str]]:
     """
-    Devuelve (result, selected_sheets).
-    result es el dict crudo de batchGet; selected_sheets son los nombres en orden.
+    Return (result, selected_sheets).
+    `result` is the raw batchGet dict; `selected_sheets` are the tab names
+    in order.
     """
     spreadsheet_id = os.getenv("SPREADSHEET_ID")
     if not spreadsheet_id:
-        raise SystemExit("Falta SPREADSHEET_ID en .env")
+        raise SystemExit("Falta SPREADSHEET_ID en .env")  # TODO: translate in layer 2
 
     service = _build_service()
     spreadsheet = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()

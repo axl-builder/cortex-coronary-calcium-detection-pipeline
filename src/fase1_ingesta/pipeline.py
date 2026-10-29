@@ -8,10 +8,10 @@ from src.fase1_ingesta.cleaning.transform import transform_sheets
 
 def _nombre_sheet(run_id: str, mock: bool) -> str:
     """
-    Nombre del Sheet subido a Drive.
-    Formato: 'CORTEX - Resultados [MOCK] YYYY-MM-DD HHMM'
+    Name of the Sheet uploaded to Drive.
+    Format: 'CORTEX - Resultados [MOCK] YYYY-MM-DD HHMM'
     """
-    # run_id es 'YYYYMMDD_HHMMSS' → parsear
+    # run_id is 'YYYYMMDD_HHMMSS' → parse
     try:
         dt = datetime.strptime(run_id, "%Y%m%d_%H%M%S")
     except ValueError:
@@ -31,29 +31,29 @@ def run_fase1(upload: bool = True,
 
     # ── Extract ──
     if mock:
-        log.info(f"Fase 1: MOCK ({mock_profile}, seed={mock_seed})")
+        log.info(f"Fase 1: MOCK ({mock_profile}, seed={mock_seed})")  # TODO: layer 2
         from src.synthetic import generar_para_fase1
         result, nombres = generar_para_fase1(
             profile=mock_profile,
             seed=mock_seed,
         )
     else:
-        log.info("Fase 1: ingesta de Sheets")
+        log.info("Fase 1: ingesta de Sheets")  # TODO: layer 2
         from src.fase1_ingesta.ingestion.sheets_client import fetch_selected_sheets
         result, nombres = fetch_selected_sheets(
             reciente=settings["sheets"]["reciente"],
             antigua=settings["sheets"]["antigua"],
         )
-    log.info(f"Pestañas seleccionadas: {len(nombres)}")
+    log.info(f"Pestañas seleccionadas: {len(nombres)}")  # TODO: layer 2
 
     # ── Transform ──
-    log.info("Fase 1: transformación")
+    log.info("Fase 1: transformación")  # TODO: layer 2
     filas, stats, problemas, fechas = transform_sheets(result, nombres, settings)
 
     # ── Load (CSV) ──
     csv_path = PROCESSED_DIR / "result.csv"
     write_csv(csv_path, settings["header"], filas)
-    log.info(f"CSV escrito: {csv_path} ({stats['filas']} filas)")
+    log.info(f"CSV escrito: {csv_path} ({stats['filas']} filas)")  # TODO: layer 2
 
     resumen = {
         "run_id": run_id,
@@ -72,12 +72,12 @@ def run_fase1(upload: bool = True,
     # ── Load (Drive) ──
     if upload:
         sheet_name = _nombre_sheet(run_id, mock)
-        log.info(f"Fase 1: subida a Drive como '{sheet_name}'")
+        log.info(f"Fase 1: subida a Drive como '{sheet_name}'")  # TODO: layer 2
         from src.fase1_ingesta.ingestion.sheet_uploader import upload_csv_as_sheet
         info = upload_csv_as_sheet(csv_path, sheet_name)
         log.info(f"Sheet: {info.get('webViewLink')}")
     elif mock:
-        log.warning("MODO MOCK: se ignora la subida a Drive")
+        log.warning("MODO MOCK: se ignora la subida a Drive")  # TODO: layer 2
 
-    log.info(f"=== FIN DE CORRIDA {run_id} ===")
+    log.info(f"=== FIN DE CORRIDA {run_id} ===")  # TODO: layer 2
     return stats

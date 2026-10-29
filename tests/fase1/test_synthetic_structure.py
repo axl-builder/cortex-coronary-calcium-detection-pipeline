@@ -1,17 +1,17 @@
 """
-Tests de estructura del mock: verifica que cada pestaña de guardia
-tiene la estructura REAL de la planilla (no la versión limpia con pandas).
+Mock structure tests: verify that each on-call tab has the REAL structure
+of the sheet (not the clean pandas version).
 
-Referencia: la pestaña `modelo` de la planilla real (que es la plantilla
-operativa vacía que los médicos copian para cada guardia).
+Reference: the `modelo` tab of the real sheet (the empty operational
+template that doctors copy for each on-call shift).
 
-Estructura esperada por pestaña:
-  fila 0:   [título operativo, "PLANILLA GUARDIA", "", ...]
-  fila 1:   ["CHECKLIST", "", ...]
-  fila 2:   ["", "PACIENTE", "SECTOR", "HAB", "ESTUDIO", ...]  ← header
-  fila 3..: datos de pacientes + residuales
-  ...:      bloque de resumen (TC/RMN GUARDIA/INTERNADOS)
-  ...:      checklist operativo (CARRO DE PARO, BRIEF, ...)
+Expected structure per tab:
+  row 0:   [operational title, "PLANILLA GUARDIA", "", ...]
+  row 1:   ["CHECKLIST", "", ...]
+  row 2:   ["", "PACIENTE", "SECTOR", "HAB", "ESTUDIO", ...]  ← header
+  row 3..: patient rows + residuals
+  ...:      summary block (TC/RMN GUARDIA/INTERNADOS)
+  ...:      operational checklist (CARRO DE PARO, BRIEF, ...)
 """
 
 import pytest
@@ -20,13 +20,13 @@ from tests.fixtures.synthetic import FIXTURE_REALISTA, fixture_pestania
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Constantes de la estructura real (extraídas del modelo)
+# Real structure constants (extracted from the template)
 # ──────────────────────────────────────────────────────────────────────
 
 TITULO_OPERATIVO = "HACER CONTEO DE PACIENTES Y REGIONES + MIRAR MAILS"
 N_COLUMNAS = 21
 
-# Header real (fila 2), columnas A..U
+# Real header (row 2), columns A..U
 HEADER_ESPERADO = [
     "",
     "PACIENTE",
@@ -34,24 +34,24 @@ HEADER_ESPERADO = [
     "HAB",
     "ESTUDIO",
     "REGION",
-    "CONTRASTE ",          # ojo: espacio al final (como en el real)
+    "CONTRASTE ",          # note: trailing space (as in the real sheet)
     "MOTIVO",
-    '"HORA\nPEDIDO"',      # con comillas literales
+    '"HORA\nPEDIDO"',      # with literal quotes
     "HS LLAMADO CAMILLERO",
-    '"REALIZADO\n"',       # con comillas literales
+    '"REALIZADO\n"',       # with literal quotes
     "COMENTARIO",
     "HECHO",
     "PREINFORME",
     "CANCELADO",
     "RMN GUARDIA",
     "RMN INTERNADO",
-    "TC GUARDIA ",         # ojo: espacio al final
-    "TC INTERNADOS ",      # ojo: espacio al final
+    "TC GUARDIA ",         # note: trailing space
+    "TC INTERNADOS ",      # note: trailing space
     "DEMORA CAMILLERO",
     "DEMORA PEDIDO",
 ]
 
-# Etiquetas del checklist operativo (fila X+.., al final)
+# Operational checklist labels (row X+.., at the end)
 ETIQUETAS_CHECKLIST = {
     "NOMBRE", "CARRO DE PARO", "BRIEF ", "ARCHIVOS DIGITALIZADOS",
     "MAIL GENERAL", "MAIL ESTUDIOS PREVIOS",
@@ -60,7 +60,7 @@ ETIQUETAS_CHECKLIST = {
     "RECONSTRUCCIONES", "PLANILLA ACV",
 }
 
-# Etiquetas del bloque de resumen
+# Summary block labels
 ETIQUETAS_RESUMEN = {"GUARDIA", "INTERNADOS", "AMBULATORIOS"}
 
 ESTUDIOS_VALIDOS = {"TC", "RMN", "RX", "ECO"}
@@ -71,12 +71,12 @@ ESTUDIOS_VALIDOS = {"TC", "RMN", "RX", "ECO"}
 # ──────────────────────────────────────────────────────────────────────
 
 def _pad(fila, n=N_COLUMNAS):
-    """Normaliza una fila a exactamente n columnas (padding/truncado)."""
+    """Normalize a row to exactly n columns (padding/truncation)."""
     return (list(fila) + [""] * n)[:n]
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Tests de estructura fija (filas 0-2)
+# Fixed structure tests (rows 0-2)
 # ──────────────────────────────────────────────────────────────────────
 
 def test_fila_0_titulo_operativo():
@@ -84,7 +84,7 @@ def test_fila_0_titulo_operativo():
     fila = _pad(vr["values"][0])
     assert fila[0] == TITULO_OPERATIVO
     assert fila[1] == "PLANILLA GUARDIA"
-    # resto vacío
+    # rest empty
     assert all(v == "" for v in fila[2:])
 
 
@@ -99,14 +99,14 @@ def test_fila_2_header_completo():
     vr = fixture_pestania("3105")
     fila = _pad(vr["values"][2])
     assert fila == HEADER_ESPERADO, (
-        f"Header no coincide.\n"
-        f"  Esperado: {HEADER_ESPERADO}\n"
-        f"  Obtenido: {fila}"
+        f"Header does not match.\n"
+        f"  Expected: {HEADER_ESPERADO}\n"
+        f"  Got: {fila}"
     )
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Tests de columnas
+# Column tests
 # ──────────────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("nombre", ["3105", "3005", "2905"])
@@ -114,36 +114,36 @@ def test_todas_las_filas_tienen_21_columnas(nombre):
     vr = fixture_pestania(nombre)
     for i, fila in enumerate(vr["values"]):
         assert len(fila) <= N_COLUMNAS, (
-            f"Fila {i} de {nombre!r} tiene {len(fila)} columnas > {N_COLUMNAS}"
+            f"Row {i} of {nombre!r} has {len(fila)} columns > {N_COLUMNAS}"
         )
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Tests del invariante "estudio → paciente"
+# "study → patient" invariant tests
 # ──────────────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("nombre", ["3105", "3005", "2905"])
 def test_estudio_implica_paciente(nombre):
     """
-    Invariante: si una fila tiene ESTUDIO válido, debe tener PACIENTE.
-    El recíproco NO se cumple (residuales tienen paciente sin estudio).
+    Invariant: if a row has a valid ESTUDIO, it must have a PACIENTE.
+    The converse does NOT hold (residuals have patient without study).
     """
     vr = fixture_pestania(nombre)
     for i, fila_raw in enumerate(vr["values"]):
         if i < 3:
-            continue  # filas 0-2 son fijas
+            continue  # rows 0-2 are fixed
         fila = _pad(fila_raw)
         estudio = str(fila[4]).strip() if fila[4] is not None else ""
         paciente = str(fila[1]).strip() if fila[1] is not None else ""
         if estudio in ESTUDIOS_VALIDOS:
             assert paciente, (
-                f"Fila {i} de {nombre!r}: estudio={estudio!r} pero sin paciente. "
-                f"Fila completa: {fila}"
+                f"Row {i} of {nombre!r}: estudio={estudio!r} but no paciente. "
+                f"Full row: {fila}"
             )
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Tests de bloques especiales
+# Special block tests
 # ──────────────────────────────────────────────────────────────────────
 
 def test_bloque_resumen_presente():
@@ -154,7 +154,7 @@ def test_bloque_resumen_presente():
         if _pad(f)[1]
     }
     assert "GUARDIA" in etiquetas, (
-        f"Falta 'GUARDIA' en el bloque de resumen. Etiquetas: {etiquetas}"
+        f"Missing 'GUARDIA' in summary block. Labels: {etiquetas}"
     )
     assert "INTERNADOS" in etiquetas
     assert "AMBULATORIOS" in etiquetas
@@ -167,21 +167,21 @@ def test_checklist_operativo_presente():
         for f in vr["values"][3:]
         if _pad(f)[1]
     }
-    # al menos 5 etiquetas del checklist deben estar
+    # at least 5 checklist labels must be present
     encontradas = etiquetas & ETIQUETAS_CHECKLIST
     assert len(encontradas) >= 5, (
-        f"Faltan etiquetas del checklist. "
-        f"Encontradas: {encontradas}, esperadas al menos 5 de {ETIQUETAS_CHECKLIST}"
+        f"Missing checklist labels. "
+        f"Found: {encontradas}, expected at least 5 of {ETIQUETAS_CHECKLIST}"
     )
-    # las más importantes
+    # the most important ones
     assert "CARRO DE PARO" in etiquetas
     assert "PLANILLA ACV" in etiquetas
 
 
 def test_residuales_tienen_estructura_correcta():
     """
-    Las residuales del modelo son filas vacías con FALSE x4 y 0:00:00 / -.
-    No deben tener conteos aleatorios.
+    The template residuals are empty rows with FALSE x4 and 0:00:00 / -.
+    They must not have random counts.
     """
     vr = fixture_pestania("3105")
     residuales = []
@@ -189,18 +189,18 @@ def test_residuales_tienen_estructura_correcta():
         if i < 3:
             continue
         fila = _pad(fila_raw)
-        # residual: paciente vacío O paciente con FALSE/FALSE en cols 2-3
-        # y sin estudio
+        # residual: empty patient OR patient with FALSE/FALSE in cols 2-3
+        # and no study
         if not fila[1] and any(fila[11:15]):
             residuales.append(fila)
 
-    # al menos una residual en la pestaña (perfil realista)
-    assert len(residuales) > 0, "No se encontraron residuales en 3105"
+    # at least one residual in the tab (realistic profile)
+    assert len(residuales) > 0, "No residuals found in 3105"
 
-    for fila in residuales[:3]:  # chequear las primeras 3
+    for fila in residuales[:3]:  # check the first 3
         # cols L-O = FALSE/FALSE/FALSE/FALSE
         assert fila[11:15] == ["FALSE", "FALSE", "FALSE", "FALSE"], (
-            f"Residual con estructura incorrecta en cols L-O: {fila[11:15]}"
+            f"Residual with wrong structure in cols L-O: {fila[11:15]}"
         )
         # cols T-U = 0:00:00 / -
         assert fila[19] == "0:00:00", f"Col T (DEMORA CAMILLERO): {fila[19]!r}"
@@ -208,7 +208,7 @@ def test_residuales_tienen_estructura_correcta():
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Tests de tipos de pestaña
+# Tab type tests
 # ──────────────────────────────────────────────────────────────────────
 
 def test_hay_pestanias_no_guardia():
@@ -216,21 +216,21 @@ def test_hay_pestanias_no_guardia():
     n_total = len(result["valueRanges"])
     n_guardia = len(nombres_guardia)
     n_no_guardia = n_total - n_guardia
-    assert n_no_guardia > 0, "El fixture realista no tiene pestañas no-guardia"
-    # los nombres de no-guardia NO están en nombres_guardia
+    assert n_no_guardia > 0, "The realistic fixture has no non-on-call tabs"
+    # non-on-call names are NOT in nombres_guardia
     nombres_no_guardia = {
         vr["range"].split("!")[0].strip("'")
         for vr in result["valueRanges"]
     } - set(nombres_guardia)
-    assert nombres_no_guardia, "No hay nombres no-guardia"
+    assert nombres_no_guardia, "No non-on-call names"
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Test de determinismo
+# Determinism test
 # ──────────────────────────────────────────────────────────────────────
 
 def test_fixture_es_determinista():
-    """Mismo seed → mismo output. Sin esto, los fixtures no sirven para CI."""
+    """Same seed → same output. Without this, fixtures are useless for CI."""
     from src.synthetic import generar_para_fase1
     r1, n1 = generar_para_fase1(profile="realista", seed=42)
     r2, n2 = generar_para_fase1(profile="realista", seed=42)

@@ -26,6 +26,4 @@ def test_auditoria_detecta_hueco():
     assert len(problemas["huecos"]) == 1
 
 
-    
-
-# Faltaría: test de fechas_manuales inyectadas, y test de la política orden='asc'
+# TODO: add test for injected fechas_manuales, and test for orden='asc' policy
