@@ -48,13 +48,13 @@ def main():
     n_guardia = len(nombres)
     n_no_guardia = n_total - n_guardia
 
-    print(f"Generadas {n_total} pestañas totales:")
-    print(f"  - {n_no_guardia} no-guardia (ignoradas por Fase 1)")
-    print(f"  - {n_guardia} de guardia (procesadas por Fase 1)")
-    print(f"Perfil: {args.profile}, seed: {args.seed}")
+    print(f"Generated {n_total} tabs:")
+    print(f"  - {n_no_guardia} non-on-call (ignored by Phase 1)")
+    print(f"  - {n_guardia} on-call (processed by Phase 1)")
+    print(f"Profile: {args.profile}, seed: {args.seed}")
     if nombres:
-        print(f"Primeras guardias: {nombres[:5]}")
-        print(f"Últimas guardias:  {nombres[-5:]}")
+        print(f"First tabs: {nombres[:5]}")
+        print(f"Last tabs:  {nombres[-5:]}")
 
     nombre_base = _nombre_base(args.profile, args.seed, args.fecha_fin)
 
@@ -63,13 +63,13 @@ def main():
         csv_paths = exportar_csv(result, args.out / "csv")
         xlsx_path = exportar_xlsx(result, args.out / f"{nombre_base}.xlsx")
         json_path = exportar_json(result, args.out / f"{nombre_base}.json")
-        print(f"\nExportado:")
+        print(f"\nExported:")
         print(f"  xlsx:  {xlsx_path}")
         print(f"  json:  {json_path}")
-        print(f"  csv:   {args.out / 'csv'}/ ({len(csv_paths)} archivos)")
+        print(f"  csv:   {args.out / 'csv'}/ ({len(csv_paths)} files)")
     elif args.format == "csv":
         paths = exportar_csv(result, args.out / "csv")
-        print(f"\nCSV: {args.out / 'csv'}/ ({len(paths)} archivos)")
+        print(f"\nCSV: {args.out / 'csv'}/ ({len(paths)} files)")
     elif args.format == "xlsx":
         args.out.mkdir(parents=True, exist_ok=True)
         path = exportar_xlsx(result, args.out / f"{nombre_base}.xlsx")

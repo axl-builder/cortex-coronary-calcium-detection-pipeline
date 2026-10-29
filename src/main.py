@@ -2,34 +2,30 @@ import argparse
 import sys
 
 
-import argparse
-import sys
-
-
 def main():
     parser = argparse.ArgumentParser(prog="cortex")
     parser.add_argument("comando", choices=["fase1", "fase2", "fase3", "all"])
     parser.add_argument(
         "--no-upload",
         action="store_true",
-        help="Fase 1: no subir el CSV a Drive",
+        help="Phase 1: do not upload the CSV to Drive",
     )
     parser.add_argument(
         "--mock",
         action="store_true",
-        help="Usar datos sintéticos en vez de Google Sheets",
+        help="Use synthetic data instead of Google Sheets",
     )
     parser.add_argument(
         "--mock-profile",
         default="realista",
         choices=["minimo", "realista", "caotico"],
-        help="Perfil del mock (default: realista)",
+        help="Mock profile (default: realista)",
     )
     parser.add_argument(
         "--mock-seed",
         type=int,
         default=42,
-        help="Semilla del mock (default: 42)",
+        help="Mock seed (default: 42)",
     )
     args = parser.parse_args()
 
@@ -43,10 +39,10 @@ def main():
         )
 
     if args.comando in ("fase2", "all"):
-        print("Fase 2 pendiente", file=sys.stderr)
+        print("Phase 2 pending", file=sys.stderr)
 
     if args.comando in ("fase3", "all"):
-        print("Fase 3 pendiente", file=sys.stderr)
+        print("Phase 3 pending", file=sys.stderr)
 
 
 if __name__ == "__main__":
