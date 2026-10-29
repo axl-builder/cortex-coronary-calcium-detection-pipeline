@@ -28,8 +28,8 @@ def test_contraste():
 
 def test_evaluar_contraste_devuelve_nombres_esperados():
     """
-    Contrato: los strings devueltos por evaluar_contraste deben coincidir
-    con el vocabulario de config (`contraste.incluir`).
+    Contract: the strings returned by evaluar_contraste must match the
+    config vocabulary (`contraste.incluir`).
     """
     sin = {"NO", "SEDACION"}
     con = {"SI", "DOBLE", "EVENTUAL", "ORAL"}
