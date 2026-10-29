@@ -26,7 +26,7 @@ def _get_credentials() -> Credentials:
             creds.refresh(Request())
         else:
             if not CLIENT_SECRET_PATH.exists():
-                raise SystemExit(f"No existe {CLIENT_SECRET_PATH}")
+                raise SystemExit(f"No existe {CLIENT_SECRET_PATH}")  # TODO: translate in layer 2
             flow = InstalledAppFlow.from_client_secrets_file(
                 str(CLIENT_SECRET_PATH), SCOPES
             )
@@ -38,9 +38,9 @@ def _get_credentials() -> Credentials:
 def upload_csv_as_sheet(csv_path: Path, sheet_name: str) -> dict:
     output = os.getenv("OUTPUT_FOLDER_ID")
     if not output:
-        raise SystemExit("Falta OUTPUT_FOLDER_ID en .env")
+        raise SystemExit("Falta OUTPUT_FOLDER_ID en .env")  # TODO: translate in layer 2
     if not csv_path.exists():
-        raise SystemExit(f"No existe el CSV: {csv_path}")
+        raise SystemExit(f"No existe el CSV: {csv_path}")  # TODO: translate in layer 2
 
     service = build("drive", "v3", credentials=_get_credentials())
 
