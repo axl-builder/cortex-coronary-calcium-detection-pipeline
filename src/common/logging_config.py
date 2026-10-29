@@ -19,6 +19,6 @@ def setup_logging(run_id: str) -> logging.Logger:
         ],
     )
     log = logging.getLogger("cortex")
-    log.info(f"=== INICIO DE CORRIDA {run_id} ===")
+    log.info(f"=== RUN START {run_id} ===")
     log.info(f"Log: {log_file}")
     return log

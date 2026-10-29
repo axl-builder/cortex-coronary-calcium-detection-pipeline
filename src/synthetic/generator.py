@@ -263,8 +263,8 @@ def generar_planilla_sintetica(profile: str = "realista",
         plus the manual-date ones, in the order they appear in the spreadsheet.
     """
     if profile not in PROFILES:
-        raise ValueError(f"Unknown profile: {profile!r}. " # TODO: layer 2
-                         f"Valid: {sorted(PROFILES)}")     # TODO: layer 2
+        raise ValueError(f"Unknown profile: {profile!r}. "
+                         f"Valid: {sorted(PROFILES)}")    
     perfil = PROFILES[profile]
     rng = random.Random(seed)
     fecha_fin = fecha_fin or date(2026, 5, 31)

@@ -56,7 +56,7 @@ def transform_sheets(result: dict, nombres: list[str], settings: dict):
             f"{sorted(_invalidos)}. Valid: {sorted(_VALIDOS)}"
         )
 
-    log.info(f"[config efectiva] incluir={set(incluir)} sin={sin_set} con={con_set}")
+    log.info(f"[effective config] incluir={set(incluir)} sin={sin_set} con={con_set}")
 
     # stats: contrato con Fase 3 (PRISMA flowchart).
     # Solo números agregados, NO estado de debugging.
@@ -122,9 +122,9 @@ def transform_sheets(result: dict, nombres: list[str], settings: dict):
             # diagnóstico: primeras 20 filas (variable local, no en stats)
             if diag_count < 20:
                 log.info(
-                    f"[diag] crudo={v_contraste_crudo!r} est={est!r} "
+                    f"[diag] raw={v_contraste_crudo!r} est={est!r} "
                     f"in={est in incluir} -> "
-                    f"{'INCLUIDA' if est in incluir else 'DESCARTADA'}"
+                    f"{'INCLUDED' if est in incluir else 'DISCARDED'}"
                 )
                 diag_count += 1
 
