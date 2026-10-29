@@ -26,7 +26,8 @@ def main():
     parser = argparse.ArgumentParser(prog="synthetic")
     parser.add_argument("--profile", default="realista",
                         choices=["minimo", "realista", "caotico"])
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--pestanias-fecha-manual", nargs="*", default=None,
+                        help="Tab names with a manual date (e.g. 'Hoja 161')")
     parser.add_argument("--n-pestanias-guardia", type=int, default=None)
     parser.add_argument("--fecha-fin", type=date.fromisoformat, default=None)
     parser.add_argument("--pestanias-fecha-manual", nargs="*", default=None,
