@@ -33,4 +33,4 @@ def fixture_pestania(nombre: str, profile: str = "realista", seed: int = 42) -> 
     for vr in result["valueRanges"]:
         if vr["range"].startswith(f"'{nombre}'"):
             return vr
-    raise KeyError(f"Pestaña {nombre!r} no encontrada en el fixture")  # TODO: layer 2
+    raise KeyError(f"Tab {nombre!r} not found in the fixture")

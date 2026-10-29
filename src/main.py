@@ -8,24 +8,24 @@ def main():
     parser.add_argument(
         "--no-upload",
         action="store_true",
-        help="Phase 1: do not upload the CSV to Drive",  # TODO: layer 2
+        help="Phase 1: do not upload the CSV to Drive",
     )
     parser.add_argument(
         "--mock",
         action="store_true",
-        help="Use synthetic data instead of Google Sheets",  # TODO: layer 2
+        help="Use synthetic data instead of Google Sheets",
     )
     parser.add_argument(
         "--mock-profile",
         default="realista",
         choices=["minimo", "realista", "caotico"],
-        help="Mock profile (default: realista)",  # TODO: layer 2
+        help="Mock profile (default: realista)",
     )
     parser.add_argument(
         "--mock-seed",
         type=int,
         default=42,
-        help="Mock seed (default: 42)",  # TODO: layer 2
+        help="Mock seed (default: 42)",
     )
     args = parser.parse_args()
 
@@ -39,10 +39,10 @@ def main():
         )
 
     if args.comando in ("fase2", "all"):
-        print("Fase 2 pendiente", file=sys.stderr)  # TODO: layer 2
+        print("Phase 2 pending", file=sys.stderr)
 
     if args.comando in ("fase3", "all"):
-        print("Fase 3 pendiente", file=sys.stderr)  # TODO: layer 2
+        print("Phase 3 pending", file=sys.stderr)
 
 
 if __name__ == "__main__":

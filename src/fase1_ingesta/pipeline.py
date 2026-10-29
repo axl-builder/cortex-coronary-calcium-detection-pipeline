@@ -31,29 +31,29 @@ def run_fase1(upload: bool = True,
 
     # ── Extract ──
     if mock:
-        log.info(f"Fase 1: MOCK ({mock_profile}, seed={mock_seed})")  # TODO: layer 2
+        log.info(f"Phase 1: MOCK ({mock_profile}, seed={mock_seed})")
         from src.synthetic import generar_para_fase1
         result, nombres = generar_para_fase1(
             profile=mock_profile,
             seed=mock_seed,
         )
     else:
-        log.info("Fase 1: ingesta de Sheets")  # TODO: layer 2
+        log.info("Phase 1: ingesting from Sheets")
         from src.fase1_ingesta.ingestion.sheets_client import fetch_selected_sheets
         result, nombres = fetch_selected_sheets(
             reciente=settings["sheets"]["reciente"],
             antigua=settings["sheets"]["antigua"],
         )
-    log.info(f"Pestañas seleccionadas: {len(nombres)}")  # TODO: layer 2
+    log.info(f"Tabs selected: {len(nombres)}")
 
     # ── Transform ──
-    log.info("Fase 1: transformación")  # TODO: layer 2
+    log.info("Phase 1: transformation")
     filas, stats, problemas, fechas = transform_sheets(result, nombres, settings)
 
     # ── Load (CSV) ──
     csv_path = PROCESSED_DIR / "result.csv"
     write_csv(csv_path, settings["header"], filas)
-    log.info(f"CSV escrito: {csv_path} ({stats['filas']} filas)")  # TODO: layer 2
+    log.info(f"CSV written: {csv_path} ({stats['filas']} rows)")
 
     resumen = {
         "run_id": run_id,
@@ -72,12 +72,12 @@ def run_fase1(upload: bool = True,
     # ── Load (Drive) ──
     if upload:
         sheet_name = _nombre_sheet(run_id, mock)
-        log.info(f"Fase 1: subida a Drive como '{sheet_name}'")  # TODO: layer 2
+        log.info(f"Phase 1: uploading to Drive as '{sheet_name}'")
         from src.fase1_ingesta.ingestion.sheet_uploader import upload_csv_as_sheet
         info = upload_csv_as_sheet(csv_path, sheet_name)
         log.info(f"Sheet: {info.get('webViewLink')}")
     elif mock:
-        log.warning("MODO MOCK: se ignora la subida a Drive")  # TODO: layer 2
+        log.warning("MOCK MODE: Drive upload skipped")
 
-    log.info(f"=== FIN DE CORRIDA {run_id} ===")  # TODO: layer 2
+    log.info(f"=== RUN END {run_id} ===")
     return stats

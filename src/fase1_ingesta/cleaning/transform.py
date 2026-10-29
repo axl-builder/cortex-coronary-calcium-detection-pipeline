@@ -52,8 +52,8 @@ def transform_sheets(result: dict, nombres: list[str], settings: dict):
     _invalidos = set(incluir) - _VALIDOS
     if _invalidos:
         raise SystemExit(
-            f"config/settings.yaml: 'contraste.incluir' tiene valores inválidos: "
-            f"{sorted(_invalidos)}. Válidos: {sorted(_VALIDOS)}"
+            f"config/settings.yaml: 'contraste.incluir' has invalid values: "
+            f"{sorted(_invalidos)}. Valid: {sorted(_VALIDOS)}"
         )
 
     log.info(f"[effective config] incluir={set(incluir)} sin={sin_set} con={con_set}")

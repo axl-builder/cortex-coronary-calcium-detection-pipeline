@@ -28,7 +28,7 @@ def main():
     parser.add_argument("--n-pestanias-guardia", type=int, default=None)
     parser.add_argument("--fecha-fin", type=date.fromisoformat, default=None)
     parser.add_argument("--pestanias-fecha-manual", nargs="*", default=None,
-                        help="Tab names with a manual date (e.g. 'Hoja 161')")  # TODO: layer 2
+                        help="Tab names with a manual date (e.g. 'Hoja 161')")
     parser.add_argument("--out", type=Path, default=Path("data/synthetic"))
     parser.add_argument("--format", default="all",
                         choices=["csv", "xlsx", "json", "all"])
@@ -46,13 +46,13 @@ def main():
     n_guardia = len(nombres)
     n_no_guardia = n_total - n_guardia
 
-    print(f"Generated {n_total} tabs:")  # TODO: layer 2
-    print(f"  - {n_no_guardia} non-on-call (ignored by Phase 1)")  # TODO: layer 2
-    print(f"  - {n_guardia} on-call (processed by Phase 1)")  # TODO: layer 2
-    print(f"Profile: {args.profile}, seed: {args.seed}")  # TODO: layer 2
+    print(f"Generated {n_total} tabs:")
+    print(f"  - {n_no_guardia} non-on-call (ignored by Phase 1)")
+    print(f"  - {n_guardia} on-call (processed by Phase 1)")
+    print(f"Profile: {args.profile}, seed: {args.seed}")
     if nombres:
-        print(f"First tabs: {nombres[:5]}")  # TODO: layer 2
-        print(f"Last tabs:  {nombres[-5:]}")  # TODO: layer 2
+        print(f"First tabs: {nombres[:5]}")
+        print(f"Last tabs:  {nombres[-5:]}")
 
     nombre_base = _nombre_base(args.profile, args.seed, args.fecha_fin)
 
@@ -61,21 +61,21 @@ def main():
         csv_paths = exportar_csv(result, args.out / "csv")
         xlsx_path = exportar_xlsx(result, args.out / f"{nombre_base}.xlsx")
         json_path = exportar_json(result, args.out / f"{nombre_base}.json")
-        print(f"\nExported:")  # TODO: layer 2
-        print(f"  xlsx:  {xlsx_path}")  # TODO: layer 2
-        print(f"  json:  {json_path}")  # TODO: layer 2
-        print(f"  csv:   {args.out / 'csv'}/ ({len(csv_paths)} files)")  # TODO: layer 2
+        print(f"\nExported:")
+        print(f"  xlsx:  {xlsx_path}")
+        print(f"  json:  {json_path}")
+        print(f"  csv:   {args.out / 'csv'}/ ({len(csv_paths)} files)")
     elif args.format == "csv":
         paths = exportar_csv(result, args.out / "csv")
-        print(f"\nCSV: {args.out / 'csv'}/ ({len(paths)} files)")  # TODO: layer 2
+        print(f"\nCSV: {args.out / 'csv'}/ ({len(paths)} files)")
     elif args.format == "xlsx":
         args.out.mkdir(parents=True, exist_ok=True)
         path = exportar_xlsx(result, args.out / f"{nombre_base}.xlsx")
-        print(f"\nXLSX: {path}")  # TODO: layer 2
+        print(f"\nXLSX: {path}")
     elif args.format == "json":
         args.out.mkdir(parents=True, exist_ok=True)
         path = exportar_json(result, args.out / f"{nombre_base}.json")
-        print(f"\nJSON: {path}")  # TODO: layer 2
+        print(f"\nJSON: {path}")
 
 
 if __name__ == "__main__":

@@ -263,8 +263,8 @@ def generar_planilla_sintetica(profile: str = "realista",
         + las de fecha manual, en el orden en que aparecen en el spreadsheet.
     """
     if profile not in PROFILES:
-        raise ValueError(f"Perfil desconocido: {profile!r}. "
-                         f"Válidos: {sorted(PROFILES)}")
+        raise ValueError(f"Unknown profile: {profile!r}. "
+                         f"Valid: {sorted(PROFILES)}")
     perfil = PROFILES[profile]
     rng = random.Random(seed)
     fecha_fin = fecha_fin or date(2026, 5, 31)
